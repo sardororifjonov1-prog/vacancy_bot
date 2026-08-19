@@ -1,8 +1,175 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template_string, request
 
 import database as db
 
 app = Flask(__name__)
+
+INDEX_HTML = """<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vakansiyalar — Akhard HR</title>
+<style>
+  :root {
+    --ink: #17202b;
+    --paper: #eef1ec;
+    --line: #c9cfc6;
+    --signal: #c85a2e;
+    --muted: #5b6a63;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Georgia", "Times New Roman", serif;
+  }
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding: 2.5rem 1.5rem 1.5rem;
+  }
+  .eyebrow {
+    font-family: "Courier New", monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    color: var(--signal);
+    margin: 0 0 0.5rem;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .sub {
+    font-family: Arial, sans-serif;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+  }
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--line);
+    font-family: Arial, sans-serif;
+  }
+  .chip {
+    padding: 0.35rem 0.8rem;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    text-decoration: none;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .chip.active {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+  .count {
+    font-family: Arial, sans-serif;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .card {
+    border-top: 1px solid var(--line);
+    padding: 1.4rem 0;
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: 1rem;
+  }
+  .card:last-child { border-bottom: 1px solid var(--line); }
+  .card .region-tag {
+    font-family: "Courier New", monospace;
+    font-size: 0.7rem;
+    color: var(--signal);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.3;
+  }
+  .card h2 {
+    margin: 0 0 0.3rem;
+    font-size: 1.25rem;
+    font-weight: 400;
+  }
+  .card .company {
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+  .card .desc {
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #333;
+    margin-bottom: 0.6rem;
+  }
+  .meta {
+    font-family: Arial, sans-serif;
+    font-size: 0.85rem;
+    display: flex;
+    gap: 1.2rem;
+    color: var(--ink);
+  }
+  .meta strong { color: var(--signal); }
+  .empty {
+    font-family: Arial, sans-serif;
+    color: var(--muted);
+    padding: 3rem 0;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Akhard HR</p>
+    <h1>Vakansiyalar taxtasi</h1>
+    <p class="sub">Admin tomonidan tasdiqlangan e'lonlar, hudud bo'yicha saralab ko'ring.</p>
+  </header>
+
+  <div class="filters">
+    <a href="/" class="chip {{ 'active' if not selected_region else '' }}">Barchasi</a>
+    {% for r in regions %}
+      <a href="/?region={{ r|urlencode }}" class="chip {{ 'active' if selected_region == r else '' }}">{{ r }}</a>
+    {% endfor %}
+  </div>
+
+  <main>
+    <p class="count">{{ vacancies|length }} ta e'lon{% if selected_region %} — {{ selected_region }}{% endif %}</p>
+
+    {% if vacancies %}
+      {% for v in vacancies %}
+      <div class="card">
+        <div class="region-tag">{{ v['region'] }}</div>
+        <div>
+          <h2>{{ v['title'] }}</h2>
+          <div class="company">{{ v['company_name'] }}</div>
+          <div class="desc">{{ v['description'] }}</div>
+          <div class="meta">
+            <span><strong>Maosh:</strong> {{ v['salary'] }}</span>
+            <span><strong>Aloqa:</strong> {{ v['contact'] }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="empty">Bu hudud bo'yicha hozircha tasdiqlangan vakansiya yo'q.</p>
+    {% endif %}
+  </main>
+</body>
+</html>
+"""
 
 
 @app.route("/")
@@ -10,8 +177,8 @@ def index():
     db.init_db()
     region = request.args.get("region") or None
     vacancies = db.get_approved_vacancies(region)
-    return render_template(
-        "index.html",
+    return render_template_string(
+        INDEX_HTML,
         vacancies=vacancies,
         regions=db.REGIONS,
         selected_region=region,
