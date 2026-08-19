@@ -1,4 +1,4 @@
-# Vakansiya bot + sayt
+# Akhard HR — vakansiya bot + sayt
 
 Ish beruvchi Telegram bot orqali hududini tanlab vakansiya joylaydi → admin
 tasdiqlaydi/rad etadi → tasdiqlangan vakansiyalar botda (`/vacancies`) va

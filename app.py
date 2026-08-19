@@ -1,9 +1,5 @@
-import sys
-from pathlib import Path
-
 from flask import Flask, render_template, request
 
-sys.path.append(str(Path(__file__).parent.parent))
 import database as db
 
 app = Flask(__name__)

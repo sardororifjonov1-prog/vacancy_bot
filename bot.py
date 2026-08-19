@@ -149,7 +149,7 @@ async def cancel_any(message: Message, state: FSMContext):
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(
-        "Salom! Bu — vakansiyalar bo'yicha bot.\n\n"
+        "Salom! Bu — Akhard HR vakansiyalar boti.\n\n"
         "📢 Ish beruvchi bo'lsangiz — vakansiya joylashingiz mumkin (admin tasdiqlagandan so'ng e'lon qilinadi).\n"
         "🔎 Ish qidiruvchi bo'lsangiz — hududingiz bo'yicha vakansiyalarni ko'rishingiz mumkin.\n"
         "🧾 \"Mening e'lonlarim\" bo'limidan joylagan vakansiyalaringiz holatini kuzatib borishingiz mumkin.",
